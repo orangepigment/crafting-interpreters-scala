@@ -1,0 +1,19 @@
+name: CI
+on:
+  pull_request: { }
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: olafurpg/setup-scala@v14
+        with:
+          java-version: graalvm@21.1.0
+
+      - name: Tests
+        run: sbt test
