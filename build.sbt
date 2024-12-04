@@ -4,5 +4,6 @@ ThisBuild / scalaVersion := "3.6.1"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "crafting-interpreters-scala"
+    name := "crafting-interpreters-scala",
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % "test"
   )
