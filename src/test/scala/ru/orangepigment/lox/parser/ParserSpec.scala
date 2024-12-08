@@ -3,6 +3,7 @@ package ru.orangepigment.lox.parser
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import ru.orangepigment.lox.ast.*
+import ru.orangepigment.lox.errors.ParserError
 import ru.orangepigment.lox.scanning.*
 
 class ParserSpec extends AnyFlatSpec with Matchers {

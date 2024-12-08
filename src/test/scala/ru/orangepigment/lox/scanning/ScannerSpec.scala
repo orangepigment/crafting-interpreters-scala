@@ -3,7 +3,7 @@ package ru.orangepigment.lox.scanning
 import org.scalatest.Inspectors
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import ru.orangepigment.lox.scanning.TokenType._
+import ru.orangepigment.lox.errors.ScannerError
 
 class ScannerSpec extends AnyFlatSpec with Matchers with Inspectors {
 
