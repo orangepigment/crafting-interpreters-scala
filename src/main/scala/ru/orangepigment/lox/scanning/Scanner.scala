@@ -1,6 +1,6 @@
 package ru.orangepigment.lox.scanning
 
-import ru.orangepigment.lox.scanning.TokenType.*
+import ru.orangepigment.lox.scanning.TokenType.{BuildToken, keywords, oneCharTokens, oneOrTwoCharTokens}
 
 import scala.annotation.tailrec
 
@@ -15,7 +15,7 @@ object Scanner {
                   tokens: List[Token]
                 ): Either[ScannerError, List[Token]] = {
       if (current >= source.length) {
-        Right((Token(EOF, "", None, line) +: tokens).reverse)
+        Right((EOF("", line) +: tokens).reverse)
       } else {
         source(current.int) match {
           // Simple one-char tokens
@@ -42,7 +42,7 @@ object Scanner {
                 case Right((endOfCommentLine, endOfCommentPos)) =>
                   scanLoop(endOfCommentLine, endOfCommentPos, tokens)
             } else {
-              val (i, token) = getToken(source, line, current, current, SLASH)
+              val (i, token) = getToken(source, line, current, current, Slash.apply)
               scanLoop(line, i, token +: tokens)
             }
           case ' ' | '\r' | '\t' => scanLoop(line, current + 1, tokens)
@@ -71,32 +71,49 @@ object Scanner {
                         line: LineNum,
                         start: Position,
                         end: Position,
-                        tokenType: TokenType
+                        builder: BuildToken
                       ): (Position, Token) = {
     val next = end + 1
+    val raw = source.substring(start.int, next.int)
+    next -> builder(raw, line)
+  }
+
+  private def getStringToken(
+                      source: String,
+                      line: LineNum,
+                      start: Position,
+                      end: Position
+                    ): (Position, Token) = {
+    val next = end + 1
+    // Trim the surrounding quotes
+    val raw = source.substring(start.int + 1, next.int - 1)
+    next -> StringToken(s"\"$raw\"", raw, line)
+  }
+
+  private def getNumberToken(
+                      source: String,
+                      line: LineNum,
+                      start: Position,
+                      end: Position
+                    ): (Position, Token) = {
+    val next = end + 1
+    val raw = source.substring(start.int, next.int)
+    next -> Number(raw, raw.toDouble, line)
+  }
+
+  private def getIdentifierToken(
+                          source: String,
+                          line: LineNum,
+                          start: Position,
+                          end: Position
+                        ): (Position, Token) = {
+    val next = end + 1
+    val raw = source.substring(start.int, next.int)
     val token =
-      tokenType match {
-        case STRING =>
-          // Trim the surrounding quotes
-          val raw = source.substring(start.int + 1, next.int - 1)
-          Token(tokenType, s"\"$raw\"", Option(StringLiteral(raw)), line)
-
-        case NUMBER =>
-          val raw = source.substring(start.int, next.int)
-          Token(tokenType, raw, Option(NumberLiteral(raw.toDouble)), line)
-
-        case IDENTIFIER =>
-          val raw = source.substring(start.int, next.int)
-          keywords.get(raw) match
-            case Some(keyword) => Token(keyword, raw, Option.empty[TokenLiteral], line)
-            case None =>
-              Token(tokenType, raw, Option(IdentifierLiteral(raw)), line)
-
-        case _ =>
-          val raw = source.substring(start.int, next.int)
-          Token(tokenType, raw, Option.empty[TokenLiteral], line)
-      }
-
+      keywords.get(raw) match
+        case Some(keywordBuilder) => keywordBuilder(raw, line)
+        case None =>
+          Identifier(raw, raw, line)
     next -> token
   }
 
@@ -105,8 +122,8 @@ object Scanner {
                                  line: LineNum,
                                  start: Position,
                                  expectedSecondChar: Char,
-                                 oneCharTokenType: TokenType,
-                                 twoCharTokenType: TokenType
+                                 oneCharTokenType: BuildToken,
+                                 twoCharTokenType: BuildToken
                                ): (Position, Token) = {
     val posToCheck = start + 1
     if (matchChar(source, expectedSecondChar, posToCheck))
@@ -139,7 +156,7 @@ object Scanner {
       } else {
         peek(source, current) match {
           case '"' =>
-            val (i, token) = getToken(source, startLine, start, current, STRING)
+            val (i, token) = getStringToken(source, startLine, start, current)
             Right((line, i, token))
 
           case '\n' => stringScan(line + 1, current + 1)
@@ -159,7 +176,7 @@ object Scanner {
         // Continue to the fractional part
         case '.' if peekNext(source, current).isDigit => numberScan(current + 1)
         // Current char is already not a part of digit
-        case _ => getToken(source, line, start, current - 1, NUMBER)
+        case _ => getNumberToken(source, line, start, current - 1)
       }
     }
 
@@ -173,7 +190,7 @@ object Scanner {
       if (peeked.isLetterOrDigit || peeked == '_') {
         identifierScan(line, current + 1)
       } else {
-        getToken(source, line, start, current - 1, IDENTIFIER)
+        getIdentifierToken(source, line, start, current - 1)
       }
     }
 
