@@ -9,34 +9,34 @@ class ScannerSpec extends AnyFlatSpec with Matchers with Inspectors {
 
   private def line(i: Int): LineNum = LineNum(i);
 
-  private def eofToken(i: Int = 1) = Token(EOF, "", None, line(i))
+  private def eofToken(i: Int = 1) = EOF("", line(i))
 
   "Scanner.scanTokens" should "scan fixed length tokens correctly" in {
-    Scanner.scanTokens("(") shouldEqual Right(List(Token(LEFT_PAREN, "(", None, line(1)), eofToken()))
-    Scanner.scanTokens(")") shouldEqual Right(List(Token(RIGHT_PAREN, ")", None, line(1)), eofToken()))
+    Scanner.scanTokens("(") shouldEqual Right(List(LeftParen("(", line(1)), eofToken()))
+    Scanner.scanTokens(")") shouldEqual Right(List(RightParen(")", line(1)), eofToken()))
 
-    Scanner.scanTokens("{") shouldEqual Right(List(Token(LEFT_BRACE, "{", None, line(1)), eofToken()))
-    Scanner.scanTokens("}") shouldEqual Right(List(Token(RIGHT_BRACE, "}", None, line(1)), eofToken()))
+    Scanner.scanTokens("{") shouldEqual Right(List(LeftBrace("{", line(1)), eofToken()))
+    Scanner.scanTokens("}") shouldEqual Right(List(RightBrace("}", line(1)), eofToken()))
 
-    Scanner.scanTokens(",") shouldEqual Right(List(Token(COMMA, ",", None, line(1)), eofToken()))
-    Scanner.scanTokens(".") shouldEqual Right(List(Token(DOT, ".", None, line(1)), eofToken()))
+    Scanner.scanTokens(",") shouldEqual Right(List(Comma(",", line(1)), eofToken()))
+    Scanner.scanTokens(".") shouldEqual Right(List(Dot(".", line(1)), eofToken()))
 
-    Scanner.scanTokens("-") shouldEqual Right(List(Token(MINUS, "-", None, line(1)), eofToken()))
-    Scanner.scanTokens("+") shouldEqual Right(List(Token(PLUS, "+", None, line(1)), eofToken()))
+    Scanner.scanTokens("-") shouldEqual Right(List(Minus("-", line(1)), eofToken()))
+    Scanner.scanTokens("+") shouldEqual Right(List(Plus("+", line(1)), eofToken()))
 
-    Scanner.scanTokens(";") shouldEqual Right(List(Token(SEMICOLON, ";", None, line(1)), eofToken()))
+    Scanner.scanTokens(";") shouldEqual Right(List(Semicolon(";", line(1)), eofToken()))
 
-    Scanner.scanTokens("/") shouldEqual Right(List(Token(SLASH, "/", None, line(1)), eofToken()))
-    Scanner.scanTokens("*") shouldEqual Right(List(Token(STAR, "*", None, line(1)), eofToken()))
+    Scanner.scanTokens("/") shouldEqual Right(List(Slash("/", line(1)), eofToken()))
+    Scanner.scanTokens("*") shouldEqual Right(List(Star("*", line(1)), eofToken()))
 
-    Scanner.scanTokens("!") shouldEqual Right(List(Token(BANG, "!", None, line(1)), eofToken()))
-    Scanner.scanTokens("!=") shouldEqual Right(List(Token(BANG_EQUAL, "!=", None, line(1)), eofToken()))
-    Scanner.scanTokens("=") shouldEqual Right(List(Token(EQUAL, "=", None, line(1)), eofToken()))
-    Scanner.scanTokens("==") shouldEqual Right(List(Token(EQUAL_EQUAL, "==", None, line(1)), eofToken()))
-    Scanner.scanTokens("<") shouldEqual Right(List(Token(LESS, "<", None, line(1)), eofToken()))
-    Scanner.scanTokens("<=") shouldEqual Right(List(Token(LESS_EQUAL, "<=", None, line(1)), eofToken()))
-    Scanner.scanTokens(">") shouldEqual Right(List(Token(GREATER, ">", None, line(1)), eofToken()))
-    Scanner.scanTokens(">=") shouldEqual Right(List(Token(GREATER_EQUAL, ">=", None, line(1)), eofToken()))
+    Scanner.scanTokens("!") shouldEqual Right(List(Bang("!", line(1)), eofToken()))
+    Scanner.scanTokens("!=") shouldEqual Right(List(BangEqual("!=", line(1)), eofToken()))
+    Scanner.scanTokens("=") shouldEqual Right(List(Equal("=", line(1)), eofToken()))
+    Scanner.scanTokens("==") shouldEqual Right(List(EqualEqual("==", line(1)), eofToken()))
+    Scanner.scanTokens("<") shouldEqual Right(List(Less("<", line(1)), eofToken()))
+    Scanner.scanTokens("<=") shouldEqual Right(List(LessEqual("<=", line(1)), eofToken()))
+    Scanner.scanTokens(">") shouldEqual Right(List(Greater(">", line(1)), eofToken()))
+    Scanner.scanTokens(">=") shouldEqual Right(List(GreaterEqual(">=", line(1)), eofToken()))
   }
 
   it should "ignore one-line comments" in {
@@ -44,16 +44,16 @@ class ScannerSpec extends AnyFlatSpec with Matchers with Inspectors {
 
     Scanner.scanTokens(
       """// Comment
-        |/""".stripMargin) shouldEqual Right(List(Token(SLASH, "/", None, line(2)), eofToken(2)))
+        |/""".stripMargin) shouldEqual Right(List(Slash("/", line(2)), eofToken(2)))
 
     Scanner.scanTokens(
       """/
-        |// Comment""".stripMargin) shouldEqual Right(List(Token(SLASH, "/", None, line(1)), eofToken(2)))
+        |// Comment""".stripMargin) shouldEqual Right(List(Slash("/", line(1)), eofToken(2)))
 
     Scanner.scanTokens(
       """/
         |// Comment
-        |/""".stripMargin) shouldEqual Right(List(Token(SLASH, "/", None, line(1)), Token(SLASH, "/", None, line(3)), eofToken(3)))
+        |/""".stripMargin) shouldEqual Right(List(Slash("/", line(1)), Slash("/", line(3)), eofToken(3)))
   }
 
   it should "ignore multi-line comments" in {
@@ -62,8 +62,8 @@ class ScannerSpec extends AnyFlatSpec with Matchers with Inspectors {
         |long *
         |comment */
         |fun F""".stripMargin) shouldEqual Right(List(
-      Token(FUN, "fun", None, line(4)),
-      Token(IDENTIFIER, "F", Some(IdentifierLiteral("F")), line(4)),
+      Fun("fun", line(4)),
+      Identifier("F", "F", line(4)),
       eofToken(4)
     ))
   }
@@ -76,45 +76,44 @@ class ScannerSpec extends AnyFlatSpec with Matchers with Inspectors {
   }
 
   it should "scan int and decimal digits" in {
-    Scanner.scanTokens("1234") shouldEqual Right(List(Token(NUMBER, "1234", Some(NumberLiteral(1234.0)), line(1)), eofToken()))
-    Scanner.scanTokens("1234.5") shouldEqual Right(List(Token(NUMBER, "1234.5", Some(NumberLiteral(1234.5)), line(1)), eofToken()))
-    Scanner.scanTokens("0.5") shouldEqual Right(List(Token(NUMBER, "0.5", Some(NumberLiteral(0.5)), line(1)), eofToken()))
+    Scanner.scanTokens("1234") shouldEqual Right(List(Number("1234", 1234.0, line(1)), eofToken()))
+    Scanner.scanTokens("1234.5") shouldEqual Right(List(Number("1234.5", 1234.5, line(1)), eofToken()))
+    Scanner.scanTokens("0.5") shouldEqual Right(List(Number("0.5", 0.5, line(1)), eofToken()))
 
     Scanner.scanTokens("1.") shouldEqual Right(List(
-      Token(NUMBER, "1", Some(NumberLiteral(1)), line(1)),
-      Token(DOT, ".", None, line(1)),
+      Number("1", 1, line(1)),
+      Dot(".", line(1)),
       eofToken()
     ))
 
     Scanner.scanTokens(".1") shouldEqual Right(List(
-      Token(DOT, ".", None, line(1)),
-      Token(NUMBER, "1", Some(NumberLiteral(1)), line(1)),
+      Dot(".", line(1)),
+      Number("1", 1, line(1)),
       eofToken()
     ))
   }
 
   it should "scan keywords" in {
-    Scanner.scanTokens("and") shouldEqual Right(List(Token(AND, "and", None, line(1)), eofToken()))
-    Scanner.scanTokens("class") shouldEqual Right(List(Token(CLASS, "class", None, line(1)), eofToken()))
-    Scanner.scanTokens("else") shouldEqual Right(List(Token(ELSE, "else", None, line(1)), eofToken()))
-    Scanner.scanTokens("false") shouldEqual Right(List(Token(FALSE, "false", None, line(1)), eofToken()))
-    Scanner.scanTokens("false") shouldEqual Right(List(Token(FALSE, "false", None, line(1)), eofToken()))
-    Scanner.scanTokens("fun") shouldEqual Right(List(Token(FUN, "fun", None, line(1)), eofToken()))
-    Scanner.scanTokens("for") shouldEqual Right(List(Token(FOR, "for", None, line(1)), eofToken()))
-    Scanner.scanTokens("if") shouldEqual Right(List(Token(IF, "if", None, line(1)), eofToken()))
-    Scanner.scanTokens("nil") shouldEqual Right(List(Token(NIL, "nil", None, line(1)), eofToken()))
-    Scanner.scanTokens("or") shouldEqual Right(List(Token(OR, "or", None, line(1)), eofToken()))
-    Scanner.scanTokens("print") shouldEqual Right(List(Token(PRINT, "print", None, line(1)), eofToken()))
-    Scanner.scanTokens("return") shouldEqual Right(List(Token(RETURN, "return", None, line(1)), eofToken()))
-    Scanner.scanTokens("super") shouldEqual Right(List(Token(SUPER, "super", None, line(1)), eofToken()))
-    Scanner.scanTokens("this") shouldEqual Right(List(Token(THIS, "this", None, line(1)), eofToken()))
-    Scanner.scanTokens("true") shouldEqual Right(List(Token(TRUE, "true", None, line(1)), eofToken()))
-    Scanner.scanTokens("var") shouldEqual Right(List(Token(VAR, "var", None, line(1)), eofToken()))
-    Scanner.scanTokens("while") shouldEqual Right(List(Token(WHILE, "while", None, line(1)), eofToken()))
+    Scanner.scanTokens("and") shouldEqual Right(List(And("and", line(1)), eofToken()))
+    Scanner.scanTokens("class") shouldEqual Right(List(Class("class", line(1)), eofToken()))
+    Scanner.scanTokens("else") shouldEqual Right(List(Else("else", line(1)), eofToken()))
+    Scanner.scanTokens("false") shouldEqual Right(List(False("false", line(1)), eofToken()))
+    Scanner.scanTokens("fun") shouldEqual Right(List(Fun("fun", line(1)), eofToken()))
+    Scanner.scanTokens("for") shouldEqual Right(List(For("for", line(1)), eofToken()))
+    Scanner.scanTokens("if") shouldEqual Right(List(If("if", line(1)), eofToken()))
+    Scanner.scanTokens("nil") shouldEqual Right(List(Nil("nil", line(1)), eofToken()))
+    Scanner.scanTokens("or") shouldEqual Right(List(Or("or", line(1)), eofToken()))
+    Scanner.scanTokens("print") shouldEqual Right(List(Print("print", line(1)), eofToken()))
+    Scanner.scanTokens("return") shouldEqual Right(List(Return("return", line(1)), eofToken()))
+    Scanner.scanTokens("super") shouldEqual Right(List(Super("super", line(1)), eofToken()))
+    Scanner.scanTokens("this") shouldEqual Right(List(This("this", line(1)), eofToken()))
+    Scanner.scanTokens("true") shouldEqual Right(List(True("true", line(1)), eofToken()))
+    Scanner.scanTokens("var") shouldEqual Right(List(Var("var", line(1)), eofToken()))
+    Scanner.scanTokens("while") shouldEqual Right(List(While("while", line(1)), eofToken()))
   }
 
   it should "scan one-line strings" in {
-    Scanner.scanTokens("\"some text\"") shouldEqual Right(List(Token(STRING, "\"some text\"", Some(StringLiteral("some text")), line(1)), eofToken()))
+    Scanner.scanTokens("\"some text\"") shouldEqual Right(List(StringToken("\"some text\"", "some text", line(1)), eofToken()))
   }
 
   it should "scan multi-line strings" in {
@@ -128,12 +127,12 @@ class ScannerSpec extends AnyFlatSpec with Matchers with Inspectors {
         """"really
           |long
           |text"""".stripMargin) shouldEqual Right(List(
-        Token(
-          STRING,
+        StringToken(
           """"really
             |long
             |text"""".stripMargin,
-          Some(StringLiteral(expectedLiteralValue)), line(1)), eofToken(3)
+          expectedLiteralValue,
+          line(1)), eofToken(3)
       ))
   }
 
@@ -146,11 +145,11 @@ class ScannerSpec extends AnyFlatSpec with Matchers with Inspectors {
   }
 
   it should "scan identifiers" in {
-    Scanner.scanTokens("a") shouldEqual Right(List(Token(IDENTIFIER, "a", Some(IdentifierLiteral("a")), line(1)), eofToken()))
-    Scanner.scanTokens("a_") shouldEqual Right(List(Token(IDENTIFIER, "a_", Some(IdentifierLiteral("a_")), line(1)), eofToken()))
-    Scanner.scanTokens("ab") shouldEqual Right(List(Token(IDENTIFIER, "ab", Some(IdentifierLiteral("ab")), line(1)), eofToken()))
-    Scanner.scanTokens("a_b") shouldEqual Right(List(Token(IDENTIFIER, "a_b", Some(IdentifierLiteral("a_b")), line(1)), eofToken()))
-    Scanner.scanTokens("ab2_") shouldEqual Right(List(Token(IDENTIFIER, "ab2_", Some(IdentifierLiteral("ab2_")), line(1)), eofToken()))
+    Scanner.scanTokens("a") shouldEqual Right(List(Identifier("a", "a", line(1)), eofToken()))
+    Scanner.scanTokens("a_") shouldEqual Right(List(Identifier("a_", "a_", line(1)), eofToken()))
+    Scanner.scanTokens("ab") shouldEqual Right(List(Identifier("ab", "ab", line(1)), eofToken()))
+    Scanner.scanTokens("a_b") shouldEqual Right(List(Identifier("a_b", "a_b", line(1)), eofToken()))
+    Scanner.scanTokens("ab2_") shouldEqual Right(List(Identifier("ab2_", "ab2_", line(1)), eofToken()))
   }
 
   it should "scan empty input" in {
@@ -171,31 +170,31 @@ class ScannerSpec extends AnyFlatSpec with Matchers with Inspectors {
         |a.b + "str" * 2.3""".stripMargin
 
     Scanner.scanTokens(source) shouldEqual Right(List(
-      Token(LEFT_PAREN, "(", None, line(2)),
-      Token(LEFT_PAREN, "(", None, line(2)),
-      Token(RIGHT_PAREN, ")", None, line(2)),
-      Token(RIGHT_PAREN, ")", None, line(2)),
-      Token(LEFT_BRACE, "{", None, line(2)),
-      Token(RIGHT_BRACE, "}", None, line(2)),
+      LeftParen("(", line(2)),
+      LeftParen("(", line(2)),
+      RightParen(")", line(2)),
+      RightParen(")", line(2)),
+      LeftBrace("{", line(2)),
+      RightBrace("}", line(2)),
 
-      Token(BANG, "!", None, line(3)),
-      Token(STAR, "*", None, line(3)),
-      Token(PLUS, "+", None, line(3)),
-      Token(MINUS, "-", None, line(3)),
-      Token(SLASH, "/", None, line(3)),
-      Token(EQUAL, "=", None, line(3)),
-      Token(LESS, "<", None, line(3)),
-      Token(GREATER, ">", None, line(3)),
-      Token(LESS_EQUAL, "<=", None, line(3)),
-      Token(EQUAL_EQUAL, "==", None, line(3)),
+      Bang("!", line(3)),
+      Star("*", line(3)),
+      Plus("+", line(3)),
+      Minus("-", line(3)),
+      Slash("/", line(3)),
+      Equal("=", line(3)),
+      Less("<", line(3)),
+      Greater(">", line(3)),
+      LessEqual("<=", line(3)),
+      EqualEqual("==", line(3)),
 
-      Token(IDENTIFIER, "a", Some(IdentifierLiteral("a")), line(4)),
-      Token(DOT, ".", None, line(4)),
-      Token(IDENTIFIER, "b", Some(IdentifierLiteral("b")), line(4)),
-      Token(PLUS, "+", None, line(4)),
-      Token(STRING, "\"str\"", Some(StringLiteral("str")), line(4)),
-      Token(STAR, "*", None, line(4)),
-      Token(NUMBER, "2.3", Some(NumberLiteral(2.3)), line(4)),
+      Identifier("a", "a", line(4)),
+      Dot(".", line(4)),
+      Identifier("b", "b", line(4)),
+      Plus("+", line(4)),
+      StringToken("\"str\"", "str", line(4)),
+      Star("*", line(4)),
+      Number("2.3", 2.3, line(4)),
 
       eofToken(4)
     ))
