@@ -1,5 +1,6 @@
 package ru.orangepigment.lox.scanning
 
+import ru.orangepigment.lox.errors.ScannerError
 import ru.orangepigment.lox.scanning.TokenType.{BuildToken, keywords, oneCharTokens, oneOrTwoCharTokens}
 
 import scala.annotation.tailrec

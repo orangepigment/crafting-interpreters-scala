@@ -1,14 +1,14 @@
 package ru.orangepigment.lox.ast
 
-import ru.orangepigment.lox.scanning.{Token, TokenLiteral}
+import ru.orangepigment.lox.scanning.{Token, TokenLiteral, UnaryOp, BinaryOp}
 
 sealed trait Expr
 
-final case class Binary(left: Expr, operator: Token, right: Expr) extends Expr
+final case class Binary(left: Expr, operator: BinaryOp, right: Expr) extends Expr
 
 final case class Grouping(expression: Expr) extends Expr
 
-final case class Unary(operator: Token, right: Expr) extends Expr
+final case class Unary(operator: UnaryOp, right: Expr) extends Expr
 
 sealed trait Literal extends Expr
 
