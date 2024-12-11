@@ -2,8 +2,7 @@ package ru.orangepigment.lox.ast
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import ru.orangepigment.lox.scanning.{LineNum, Minus, Or, Star, Token}
-import ru.orangepigment.lox.scanning.TokenType.*
+import ru.orangepigment.lox.scanning.{Bang, LineNum, Minus, Star}
 
 class AstPrinterSpec extends AnyFlatSpec with Matchers {
 
@@ -23,13 +22,12 @@ class AstPrinterSpec extends AnyFlatSpec with Matchers {
 
   it should "render another ast correctly" in {
     val expression =
-      Binary(
-        BooleanLiteral(false),
-        Or("or", LineNum(1)),
-        BooleanLiteral(true)
+      Unary(
+        Bang("!", LineNum(1)),
+        BooleanLiteral(false)
       )
 
-    AstPrinter.render(expression) shouldEqual "(or false true)"
+    AstPrinter.render(expression) shouldEqual "(! false)"
   }
 
 }

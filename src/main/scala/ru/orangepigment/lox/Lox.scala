@@ -1,8 +1,10 @@
 package ru.orangepigment.lox
 
 import ru.orangepigment.lox.ast.AstPrinter
-import ru.orangepigment.lox.parser.{Parser, ParserError}
-import ru.orangepigment.lox.scanning.{And, Bang, BangEqual, Comma, Dot, EOF, Else, Equal, EqualEqual, False, For, Fun, Greater, GreaterEqual, If, LeftBrace, LeftParen, Less, LessEqual, LineNum, Minus, Nil, Or, Plus, Print, Return, RightBrace, RightParen, Scanner, ScannerError, Semicolon, Slash, Star, Super, This, TokenLiteral, True, Var, While}
+import ru.orangepigment.lox.errors.*
+import ru.orangepigment.lox.interpreter.Interpreter
+import ru.orangepigment.lox.parser.Parser
+import ru.orangepigment.lox.scanning.{EOF, LineNum, Scanner}
 
 import java.nio.charset.Charset
 import java.nio.file.{Files, Paths}
@@ -23,8 +25,9 @@ object Lox {
 
   private def runFile(path: String): Unit = {
     val source = new String(Files.readAllBytes(Paths.get(path)), Charset.defaultCharset())
-    if (!run(source)) {
-      sys.exit(65)
+    run(source).left.foreach {
+      case _: ScannerError | _: ParserError => sys.exit(65)
+      case _: RuntimeError => sys.exit(70)
     }
   }
 
@@ -37,29 +40,27 @@ object Lox {
     }
   }
 
-  private def run(source: String): Boolean = {
-    Scanner.scanTokens(source) match
-      case Left(error) => reportError(error)
-      case Right(tokens) =>
-        tokens.foreach(println)
-        Parser.parse(tokens.toArray) match
-          case Left(error) => reportError(error)
-          case Right(expr) => AstPrinter.print(expr)
-        true
+  private def run(source: String): Either[LoxError, Unit] = {
+    (for {
+      tokens <- Scanner.scanTokens(source)
+      expr <- Parser.parse(tokens.toArray)
+      //_ <- Right(AstPrinter.print(expr))
+      _ <- Interpreter.interpretAndStringify(expr).map(println)
+    } yield ()).tapError(reportError)
   }
 
-  // ToDo: make a single ADT for errors? Or do not mix domains?
-  private def reportError(error: ScannerError): Boolean =
-    report(error.line, "", error.message)
+  private def reportError(error: LoxError): Unit = {
+    error match
+      case ScannerError(line, message) => report(line, "", message)
+      case ParserError(token, message) =>
+        token match {
+          case EOF(lexeme, line) => report(line, " at end", message)
+          case _ => report(token.line, " at '" + token.lexeme + "'", message)
+        }
+      case RuntimeError(token, message) => report(token.line, "", message)
+  }
 
-  private def reportError(error: ParserError): Boolean =
-    error.token match {
-      case EOF(lexeme, line) => report(line, " at end", error.message)
-      case _ => report(error.token.line, " at '" + error.token.lexeme + "'", error.message)
-    }
-  private def report(line: LineNum, where: String, message: String): Boolean = {
+  private def report(line: LineNum, where: String, message: String): Unit =
     println(s"[line ${line.int}] Error$where: $message")
-    false
-  }
 
 }

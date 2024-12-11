@@ -7,6 +7,9 @@ sealed trait Token {
   override def toString: String = s"L$line: ${getClass.getSimpleName} $lexeme"
 }
 
+sealed trait UnaryOp extends Token
+sealed trait BinaryOp extends Token
+
 // Single-character tokens.
 final case class LeftParen(override val lexeme: String, override val line: LineNum) extends Token
 
@@ -20,33 +23,33 @@ final case class Comma(override val lexeme: String, override val line: LineNum) 
 
 final case class Dot(override val lexeme: String, override val line: LineNum) extends Token
 
-final case class Minus(override val lexeme: String, override val line: LineNum) extends Token
+final case class Minus(override val lexeme: String, override val line: LineNum) extends UnaryOp with BinaryOp
 
-final case class Plus(override val lexeme: String, override val line: LineNum) extends Token
+final case class Plus(override val lexeme: String, override val line: LineNum) extends BinaryOp
 
 final case class Semicolon(override val lexeme: String, override val line: LineNum) extends Token
 
-final case class Slash(override val lexeme: String, override val line: LineNum) extends Token
+final case class Slash(override val lexeme: String, override val line: LineNum) extends BinaryOp
 
-final case class Star(override val lexeme: String, override val line: LineNum) extends Token
+final case class Star(override val lexeme: String, override val line: LineNum) extends BinaryOp
 
 
 // One or two character tokens.
-final case class Bang(override val lexeme: String, override val line: LineNum) extends Token
+final case class Bang(override val lexeme: String, override val line: LineNum) extends UnaryOp
 
-final case class BangEqual(override val lexeme: String, override val line: LineNum) extends Token
+final case class BangEqual(override val lexeme: String, override val line: LineNum) extends BinaryOp
 
 final case class Equal(override val lexeme: String, override val line: LineNum) extends Token
 
-final case class EqualEqual(override val lexeme: String, override val line: LineNum) extends Token
+final case class EqualEqual(override val lexeme: String, override val line: LineNum) extends BinaryOp
 
-final case class Greater(override val lexeme: String, override val line: LineNum) extends Token
+final case class Greater(override val lexeme: String, override val line: LineNum) extends BinaryOp
 
-final case class GreaterEqual(override val lexeme: String, override val line: LineNum) extends Token
+final case class GreaterEqual(override val lexeme: String, override val line: LineNum) extends BinaryOp
 
-final case class Less(override val lexeme: String, override val line: LineNum) extends Token
+final case class Less(override val lexeme: String, override val line: LineNum) extends BinaryOp
 
-final case class LessEqual(override val lexeme: String, override val line: LineNum) extends Token
+final case class LessEqual(override val lexeme: String, override val line: LineNum) extends BinaryOp
 
 // Literals.
 sealed trait TokenLiteral[A] extends Token {
@@ -63,7 +66,7 @@ final case class Number(override val lexeme: String, override val raw: Double, o
 
 // Keywords
 
-final case class And(override val lexeme: String, override val line: LineNum) extends Token
+final case class And(override val lexeme: String, override val line: LineNum) extends Token//BinaryOp
 
 final case class Class(override val lexeme: String, override val line: LineNum) extends Token
 
@@ -79,7 +82,7 @@ final case class If(override val lexeme: String, override val line: LineNum) ext
 
 final case class Nil(override val lexeme: String, override val line: LineNum) extends Token
 
-final case class Or(override val lexeme: String, override val line: LineNum) extends Token
+final case class Or(override val lexeme: String, override val line: LineNum) extends Token//BinaryOp
 
 final case class Print(override val lexeme: String, override val line: LineNum) extends Token
 

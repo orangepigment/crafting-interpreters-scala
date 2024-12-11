@@ -1,6 +1,7 @@
 package ru.orangepigment.lox.parser
 
 import ru.orangepigment.lox.ast.{Binary, BooleanLiteral, Expr, Grouping, Literal, NilLiteral, NumberLiteral, StringLiteral, Unary}
+import ru.orangepigment.lox.errors.ParserError
 import ru.orangepigment.lox.scanning.*
 import ru.orangepigment.lox.scanning.TokenType.*
 
@@ -23,7 +24,7 @@ object Parser {
         operator match {
           case BangEqual(_, _) | EqualEqual(_, _) =>
             nestedTailCall(comparison(tokens, current + 1)) { case (next, right) =>
-              val eqExpr = Binary(expr, operator, right)
+              val eqExpr = Binary(expr, operator.asInstanceOf[BinaryOp], right)
               loop(tokens)(next, eqExpr)
             }
           case _ => done(Right(current, expr))
@@ -44,7 +45,7 @@ object Parser {
         operator match {
           case Greater(_, _) | GreaterEqual(_, _) | Less(_, _) | LessEqual(_, _) =>
             nestedTailCall(term(tokens, current + 1)) { case (next, right) =>
-              val compExpr = Binary(expr, operator, right)
+              val compExpr = Binary(expr, operator.asInstanceOf[BinaryOp], right)
               loop(tokens)(next, compExpr)
             }
           case _ => done(Right(current, expr))
@@ -65,7 +66,7 @@ object Parser {
         operator match {
           case Minus(_, _) | Plus(_, _) =>
             nestedTailCall(factor(tokens, current + 1)) { case (next, right) =>
-              val termExpr = Binary(expr, operator, right)
+              val termExpr = Binary(expr, operator.asInstanceOf[BinaryOp], right)
               loop(tokens)(next, termExpr)
             }
           case _ => done(Right(current, expr))
@@ -86,7 +87,7 @@ object Parser {
         operator match {
           case Slash(_, _) | Star(_, _) =>
             nestedTailCall(unary(tokens, current + 1)) { case (next, right) =>
-              val factorExpr = Binary(expr, operator, right)
+              val factorExpr = Binary(expr, operator.asInstanceOf[BinaryOp], right)
               loop(tokens)(next, factorExpr)
             }
           case _ => done(Right(current, expr))
@@ -107,7 +108,7 @@ object Parser {
         case Bang(_, _) | Minus(_, _) =>
           tailcall(unary(tokens, current + 1)).map {
             case l@Left(error) => l
-            case Right((next, expr)) => Right(next -> Unary(operator, expr))
+            case Right((next, expr)) => Right(next -> Unary(operator.asInstanceOf[UnaryOp], expr))
           }
         case _ => tailcall(primary(tokens, current))
       }
