@@ -10,7 +10,7 @@ import ru.orangepigment.lox.gen.*
 import ru.orangepigment.lox.scanning.*
 
 class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyChecks {
-  "Interpreter.interpret" should "correctly evaluate provided expression" in {
+  "Interpreter.evaluate" should "correctly evaluate provided expression" in {
     val expression =
       Binary(
         Unary(
@@ -21,7 +21,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
         Grouping(NumberLiteral(45.67))
       )
 
-    Interpreter.interpret(expression) shouldEqual Right(Option(-5617.41))
+    Interpreter.evaluate(expression) shouldEqual Right(Option(-5617.41))
   }
 
   it should "eval subtraction correctly for numbers" in {
@@ -33,7 +33,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           NumberLiteral(d2)
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(d1 - d2))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 - d2))
     }
   }
 
@@ -46,7 +46,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           NumberLiteral(d2)
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(d1 + d2))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 + d2))
     }
   }
 
@@ -66,7 +66,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           lit2
         )
 
-      Interpreter.interpret(expression) shouldEqual Left(RuntimeError(Plus("+", LineNum(1)), "Operands must be two numbers or two strings."))
+      Interpreter.evaluate(expression) shouldEqual Left(RuntimeError(Plus("+", LineNum(1)), "Operands must be two numbers or two strings."))
     }
   }
 
@@ -79,7 +79,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           StringLiteral(s2)
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(s1 + s2))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(s1 + s2))
     }
   }
 
@@ -92,7 +92,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           NumberLiteral(d2)
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(d1 * d2))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 * d2))
     }
   }
 
@@ -105,7 +105,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           NumberLiteral(d2)
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(d1 / d2))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 / d2))
     }
   }
 
@@ -129,7 +129,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           lit2
         )
 
-      Interpreter.interpret(expression) shouldEqual Left(RuntimeError(operator, "Operands must be two numbers."))
+      Interpreter.evaluate(expression) shouldEqual Left(RuntimeError(operator, "Operands must be two numbers."))
     }
   }
 
@@ -142,7 +142,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           NumberLiteral(d2)
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(d1 > d2))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 > d2))
     }
   }
 
@@ -155,7 +155,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           NumberLiteral(d2)
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(d1 >= d2))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 >= d2))
     }
   }
 
@@ -168,7 +168,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           NumberLiteral(d2)
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(d1 < d2))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 < d2))
     }
   }
 
@@ -181,7 +181,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           NumberLiteral(d2)
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(d1 <= d2))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 <= d2))
     }
   }
 
@@ -201,7 +201,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           lit2
         )
 
-      Interpreter.interpret(expression) shouldEqual Left(RuntimeError(operator, "Operands must be two numbers."))
+      Interpreter.evaluate(expression) shouldEqual Left(RuntimeError(operator, "Operands must be two numbers."))
     }
   }
 
@@ -213,7 +213,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           NumberLiteral(d)
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(-d))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(-d))
     }
   }
 
@@ -225,7 +225,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           lit
         )
 
-      Interpreter.interpret(expression) shouldEqual Left(RuntimeError(Minus("-", LineNum(1)), "Operand must be a number."))
+      Interpreter.evaluate(expression) shouldEqual Left(RuntimeError(Minus("-", LineNum(1)), "Operand must be a number."))
     }
   }
 
@@ -237,7 +237,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           BooleanLiteral(b)
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(!b))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(!b))
     }
   }
 
@@ -249,7 +249,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           NumberLiteral(d)
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(false))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(false))
     }
   }
 
@@ -261,7 +261,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           StringLiteral(s)
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(false))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(false))
     }
   }
 
@@ -272,7 +272,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
         NilLiteral
       )
 
-    Interpreter.interpret(expression) shouldEqual Right(Option(true))
+    Interpreter.evaluate(expression) shouldEqual Right(Option(true))
   }
 
   it should "check any non-nil literal equality to nil correctly" in {
@@ -288,7 +288,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           lit2
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(false))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(false))
     }
   }
 
@@ -305,7 +305,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           lit2
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(true))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(true))
     }
   }
 
@@ -317,7 +317,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
         NilLiteral
       )
 
-    Interpreter.interpret(expression) shouldEqual Right(Option(true))
+    Interpreter.evaluate(expression) shouldEqual Right(Option(true))
   }
 
   it should "check nil non-equality correctly" in {
@@ -328,7 +328,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
         NilLiteral
       )
 
-    Interpreter.interpret(expression) shouldEqual Right(Option(false))
+    Interpreter.evaluate(expression) shouldEqual Right(Option(false))
   }
 
   it should "check equality of literals of different types correctly" in {
@@ -348,7 +348,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           lit2
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(false))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(false))
     }
   }
 
@@ -369,7 +369,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           lit2
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(true))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(true))
     }
   }
 
@@ -387,7 +387,7 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           lit
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(true))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(true))
     }
   }
 
@@ -405,11 +405,11 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
           lit
         )
 
-      Interpreter.interpret(expression) shouldEqual Right(Option(false))
+      Interpreter.evaluate(expression) shouldEqual Right(Option(false))
     }
   }
 
-  "Interpreter.interpretAndStringify" should "format result correctly" in {
+  /*"Interpreter.interpretAndStringify" should "format result correctly" in {
     forAll(Gen.oneOf(genStringLiteral, genBooleanLiteral)) { lit =>
       Interpreter.interpretAndStringify(lit) shouldEqual Right(lit.literal.toString)
     }
@@ -424,5 +424,5 @@ class InterpreterSpec extends AnyFlatSpec with Matchers with ScalaCheckPropertyC
 
   it should "format nil correctly" in {
     Interpreter.interpretAndStringify(NilLiteral) shouldEqual Right("nil")
-  }
+  }*/
 }

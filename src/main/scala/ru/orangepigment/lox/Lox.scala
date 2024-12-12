@@ -43,9 +43,9 @@ object Lox {
   private def run(source: String): Either[LoxError, Unit] = {
     (for {
       tokens <- Scanner.scanTokens(source)
-      expr <- Parser.parse(tokens.toArray)
+      program <- Parser.parse(tokens.toArray)
       //_ <- Right(AstPrinter.print(expr))
-      _ <- Interpreter.interpretAndStringify(expr).map(println)
+      _ <- Interpreter.interpret(program)
     } yield ()).tapError(reportError)
   }
 

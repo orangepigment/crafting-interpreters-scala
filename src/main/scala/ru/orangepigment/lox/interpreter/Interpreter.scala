@@ -1,6 +1,6 @@
 package ru.orangepigment.lox.interpreter
 
-import ru.orangepigment.lox.ast.{Binary, BooleanLiteral, Expr, Grouping, IdentifierLiteral, NilLiteral, NumberLiteral, StringLiteral, Unary}
+import ru.orangepigment.lox.ast.{Binary, BooleanLiteral, Expr, ExpressionStmt, Grouping, IdentifierLiteral, NilLiteral, NumberLiteral, PrintStmt, Stmt, StringLiteral, Unary, VarDeclStmt}
 import ru.orangepigment.lox.errors.RuntimeError
 import ru.orangepigment.lox.scanning.{Bang, BangEqual, EqualEqual, Greater, GreaterEqual, Less, LessEqual, Minus, Plus, Slash, Star, Token}
 
@@ -10,10 +10,22 @@ object Interpreter {
 
   private type InterpreterResult = Either[RuntimeError, Option[Any]]
 
-  def interpretAndStringify(expr: Expr): Either[RuntimeError, String] =
-    interpret(expr).map(r => stringify(r))
+  //def interpretAndStringify(program: List[Stmt]): Either[RuntimeError, String] =
+  //  evaluate(program).map(r => stringify(r))
 
-  def interpret(expr: Expr): InterpreterResult = {
+  private val INIT: Either[RuntimeError, Unit] = Right(())
+
+  def interpret(program: List[Stmt]): Either[RuntimeError, Unit] =
+    program.foldLeft(INIT) { case (prev, stmt) =>
+      prev.flatMap { _ =>
+        stmt match
+          case ExpressionStmt(expression) => evaluate(expression).map(_ => ())
+          case PrintStmt(expression) => evaluate(expression).map(r => println(stringify(r)))
+          case VarDeclStmt(name, expression) => ???
+      }
+    }
+
+  def evaluate(expr: Expr): InterpreterResult = {
     def walk(expr: Expr): TailRec[InterpreterResult] = {
       expr match
         case Unary(operator, expr) => tailcall(walk(expr)).map { e =>

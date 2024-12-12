@@ -15,16 +15,22 @@ class ParserSpec extends AnyFlatSpec with Matchers {
       LeftParen("(", LineNum(1)),
       Number("45.67", 45.67, LineNum(1)),
       RightParen(")", LineNum(1)),
+      Semicolon(";", LineNum(1)),
       EOF("", LineNum(1))
     )
-    val expected: Expr = Binary(
-      Unary(
-        Minus("-", LineNum(1)),
-        NumberLiteral(123)
-      ),
-      Star("*", LineNum(1)),
-      Grouping(NumberLiteral(45.67))
+    val expected: List[Stmt] = List(
+      ExpressionStmt(
+        Binary(
+          Unary(
+            Minus("-", LineNum(1)),
+            NumberLiteral(123)
+          ),
+          Star("*", LineNum(1)),
+          Grouping(NumberLiteral(45.67))
+        )
+      )
     )
+
     Parser.parse(input) shouldEqual Right(expected)
   }
 
