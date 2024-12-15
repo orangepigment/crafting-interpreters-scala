@@ -10,4 +10,5 @@ final case class ExpressionStmt(expression: Expr) extends StmtWithExpression
 
 final case class PrintStmt(expression: Expr) extends StmtWithExpression
 
-final case class VarDeclStmt(name: IdentifierLiteral, expression: Option[Expr]) extends Stmt
+final case class VarDeclStmt(name: IdentifierLiteral, expression: Option[Expr])
+    extends Stmt

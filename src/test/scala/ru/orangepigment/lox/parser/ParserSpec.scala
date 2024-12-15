@@ -21,10 +21,7 @@ class ParserSpec extends AnyFlatSpec with Matchers {
     val expected: List[Stmt] = List(
       ExpressionStmt(
         Binary(
-          Unary(
-            Minus("-", LineNum(1)),
-            NumberLiteral(123)
-          ),
+          Unary(Minus("-", LineNum(1)), NumberLiteral(123)),
           Star("*", LineNum(1)),
           Grouping(NumberLiteral(45.67))
         )
@@ -40,7 +37,10 @@ class ParserSpec extends AnyFlatSpec with Matchers {
       Number("1", 1, LineNum(1)),
       EOF("", LineNum(1))
     )
-    val expected: ParserError = ParserError(EOF("", LineNum(1)), "Expected ')' after expression, got L1: EOF  instead.")
+    val expected: ParserError = ParserError(
+      EOF("", LineNum(1)),
+      "Expected ')' after expression, got L1: EOF  instead."
+    )
     Parser.parse(input) shouldEqual Left(expected)
 
     val input2: Array[Token] = Array(
@@ -49,7 +49,10 @@ class ParserSpec extends AnyFlatSpec with Matchers {
       Plus("+", LineNum(1)),
       EOF("", LineNum(1))
     )
-    val expected2: ParserError = ParserError(EOF("", LineNum(1)), "Expected a literal or '(', got L1: EOF  instead.")
+    val expected2: ParserError = ParserError(
+      EOF("", LineNum(1)),
+      "Expected a literal or '(', got L1: EOF  instead."
+    )
     Parser.parse(input2) shouldEqual Left(expected2)
   }
 }

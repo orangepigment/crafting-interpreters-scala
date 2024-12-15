@@ -9,10 +9,7 @@ class AstPrinterSpec extends AnyFlatSpec with Matchers {
   "AstPrinter.render" should "render the ast correctly" in {
     val expression =
       Binary(
-        Unary(
-          Minus("-", LineNum(1)),
-          NumberLiteral(123)
-        ),
+        Unary(Minus("-", LineNum(1)), NumberLiteral(123)),
         Star("*", LineNum(1)),
         Grouping(NumberLiteral(45.67))
       )
@@ -22,10 +19,7 @@ class AstPrinterSpec extends AnyFlatSpec with Matchers {
 
   it should "render another ast correctly" in {
     val expression =
-      Unary(
-        Bang("!", LineNum(1)),
-        BooleanLiteral(false)
-      )
+      Unary(Bang("!", LineNum(1)), BooleanLiteral(false))
 
     AstPrinter.render(expression) shouldEqual "(! false)"
   }

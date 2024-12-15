@@ -4,7 +4,8 @@ import ru.orangepigment.lox.scanning.{Token, TokenLiteral, UnaryOp, BinaryOp}
 
 sealed trait Expr
 
-final case class Binary(left: Expr, operator: BinaryOp, right: Expr) extends Expr
+final case class Binary(left: Expr, operator: BinaryOp, right: Expr)
+    extends Expr
 
 final case class Grouping(expression: Expr) extends Expr
 
@@ -16,16 +17,15 @@ sealed trait ValueLiteral[A] extends Literal {
   def literal: A
 }
 
-final case class NumberLiteral(override val literal: Double) extends ValueLiteral[Double]
+final case class NumberLiteral(override val literal: Double)
+    extends ValueLiteral[Double]
 
-final case class StringLiteral(override val literal: String) extends ValueLiteral[String]
+final case class StringLiteral(override val literal: String)
+    extends ValueLiteral[String]
 
 final case class IdentifierLiteral(literal: String) extends Literal
 
-final case class BooleanLiteral(override val literal: Boolean) extends ValueLiteral[Boolean]
+final case class BooleanLiteral(override val literal: Boolean)
+    extends ValueLiteral[Boolean]
 
 case object NilLiteral extends Literal
-
-
-
-

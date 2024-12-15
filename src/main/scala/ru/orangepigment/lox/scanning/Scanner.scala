@@ -1,20 +1,24 @@
 package ru.orangepigment.lox.scanning
 
 import ru.orangepigment.lox.errors.ScannerError
-import ru.orangepigment.lox.scanning.TokenType.{BuildToken, keywords, oneCharTokens, oneOrTwoCharTokens}
+import ru.orangepigment.lox.scanning.TokenType.{
+  BuildToken,
+  keywords,
+  oneCharTokens,
+  oneOrTwoCharTokens
+}
 
 import scala.annotation.tailrec
-
 
 object Scanner {
 
   def scanTokens(source: String): Either[ScannerError, List[Token]] = {
     @tailrec
     def scanLoop(
-                  line: LineNum,
-                  current: Position,
-                  tokens: List[Token]
-                ): Either[ScannerError, List[Token]] = {
+      line: LineNum,
+      current: Position,
+      tokens: List[Token]
+    ): Either[ScannerError, List[Token]] = {
       if (current >= source.length) {
         Right((EOF("", line) +: tokens).reverse)
       } else {
@@ -26,8 +30,16 @@ object Scanner {
             scanLoop(line, i, token +: tokens)
           // One-two char operators
           case char if oneOrTwoCharTokens.contains(char) =>
-            val (expectedSecondChar, oneCharTokenType, twoCharTokenType) = oneOrTwoCharTokens(char)
-            val (i, token) = oneOrTwoCharToken(source, line, current, expectedSecondChar, oneCharTokenType, twoCharTokenType)
+            val (expectedSecondChar, oneCharTokenType, twoCharTokenType) =
+              oneOrTwoCharTokens(char)
+            val (i, token) = oneOrTwoCharToken(
+              source,
+              line,
+              current,
+              expectedSecondChar,
+              oneCharTokenType,
+              twoCharTokenType
+            )
             scanLoop(line, i, token +: tokens)
           // Comments
           case '/' =>
@@ -43,11 +55,12 @@ object Scanner {
                 case Right((endOfCommentLine, endOfCommentPos)) =>
                   scanLoop(endOfCommentLine, endOfCommentPos, tokens)
             } else {
-              val (i, token) = getToken(source, line, current, current, Slash.apply)
+              val (i, token) =
+                getToken(source, line, current, current, Slash.apply)
               scanLoop(line, i, token +: tokens)
             }
           case ' ' | '\r' | '\t' => scanLoop(line, current + 1, tokens)
-          case '\n' => scanLoop(line + 1, current + 1, tokens)
+          case '\n'              => scanLoop(line + 1, current + 1, tokens)
           case '"' =>
             string(source, line, current) match
               case Left(error) => Left(error) // Change the right type
@@ -59,7 +72,8 @@ object Scanner {
           case char if char.isLetter || char == '_' =>
             val (i, token) = identifier(source, line, current)
             scanLoop(line, i, token +: tokens)
-          case unexpectedChar => Left(ScannerError(line, s"Unexpected character '$unexpectedChar'."))
+          case unexpectedChar =>
+            Left(ScannerError(line, s"Unexpected character '$unexpectedChar'."))
         }
       }
     }
@@ -68,23 +82,23 @@ object Scanner {
   }
 
   private def getToken(
-                        source: String,
-                        line: LineNum,
-                        start: Position,
-                        end: Position,
-                        builder: BuildToken
-                      ): (Position, Token) = {
+    source: String,
+    line: LineNum,
+    start: Position,
+    end: Position,
+    builder: BuildToken
+  ): (Position, Token) = {
     val next = end + 1
     val raw = source.substring(start.int, next.int)
     next -> builder(raw, line)
   }
 
   private def getStringToken(
-                      source: String,
-                      line: LineNum,
-                      start: Position,
-                      end: Position
-                    ): (Position, Token) = {
+    source: String,
+    line: LineNum,
+    start: Position,
+    end: Position
+  ): (Position, Token) = {
     val next = end + 1
     // Trim the surrounding quotes
     val raw = source.substring(start.int + 1, next.int - 1)
@@ -92,22 +106,22 @@ object Scanner {
   }
 
   private def getNumberToken(
-                      source: String,
-                      line: LineNum,
-                      start: Position,
-                      end: Position
-                    ): (Position, Token) = {
+    source: String,
+    line: LineNum,
+    start: Position,
+    end: Position
+  ): (Position, Token) = {
     val next = end + 1
     val raw = source.substring(start.int, next.int)
     next -> Number(raw, raw.toDouble, line)
   }
 
   private def getIdentifierToken(
-                          source: String,
-                          line: LineNum,
-                          start: Position,
-                          end: Position
-                        ): (Position, Token) = {
+    source: String,
+    line: LineNum,
+    start: Position,
+    end: Position
+  ): (Position, Token) = {
     val next = end + 1
     val raw = source.substring(start.int, next.int)
     val token =
@@ -119,13 +133,13 @@ object Scanner {
   }
 
   private def oneOrTwoCharToken(
-                                 source: String,
-                                 line: LineNum,
-                                 start: Position,
-                                 expectedSecondChar: Char,
-                                 oneCharTokenType: BuildToken,
-                                 twoCharTokenType: BuildToken
-                               ): (Position, Token) = {
+    source: String,
+    line: LineNum,
+    start: Position,
+    expectedSecondChar: Char,
+    oneCharTokenType: BuildToken,
+    twoCharTokenType: BuildToken
+  ): (Position, Token) = {
     val posToCheck = start + 1
     if (matchChar(source, expectedSecondChar, posToCheck))
       getToken(source, line, start, posToCheck, twoCharTokenType)
@@ -134,10 +148,15 @@ object Scanner {
 
   @tailrec
   private def skipUntilTheEOL(source: String, current: Position): Position = {
-    if (peek(source, current) != '\n') skipUntilTheEOL(source, current + 1) else current
+    if (peek(source, current) != '\n') skipUntilTheEOL(source, current + 1)
+    else current
   }
 
-  private def matchChar(source: String, expected: Char, current: Position): Boolean =
+  private def matchChar(
+    source: String,
+    expected: Char,
+    current: Position
+  ): Boolean =
     current < source.length && source.charAt(current.int) == expected
 
   private def peek(source: String, current: Position): Char = {
@@ -149,9 +168,16 @@ object Scanner {
   }
 
   // Line Pos Token
-  private def string(source: String, startLine: LineNum, start: Position): Either[ScannerError, (LineNum, Position, Token)] = {
+  private def string(
+    source: String,
+    startLine: LineNum,
+    start: Position
+  ): Either[ScannerError, (LineNum, Position, Token)] = {
     @tailrec
-    def stringScan(line: LineNum, current: Position): Either[ScannerError, (LineNum, Position, Token)] = {
+    def stringScan(
+      line: LineNum,
+      current: Position
+    ): Either[ScannerError, (LineNum, Position, Token)] = {
       if (current >= source.length) {
         Left(ScannerError(line, "Unterminated string."))
       } else {
@@ -161,7 +187,7 @@ object Scanner {
             Right((line, i, token))
 
           case '\n' => stringScan(line + 1, current + 1)
-          case _ => stringScan(line, current + 1)
+          case _    => stringScan(line, current + 1)
         }
       }
     }
@@ -169,7 +195,11 @@ object Scanner {
     stringScan(startLine, start + 1)
   }
 
-  private def number(source: String, line: LineNum, start: Position): (Position, Token) = {
+  private def number(
+    source: String,
+    line: LineNum,
+    start: Position
+  ): (Position, Token) = {
     @tailrec
     def numberScan(current: Position): (Position, Token) = {
       peek(source, current) match {
@@ -184,7 +214,11 @@ object Scanner {
     numberScan(start + 1)
   }
 
-  private def identifier(source: String, line: LineNum, start: Position): (Position, Token) = {
+  private def identifier(
+    source: String,
+    line: LineNum,
+    start: Position
+  ): (Position, Token) = {
     @tailrec
     def identifierScan(line: LineNum, current: Position): (Position, Token) = {
       val peeked = peek(source, current)
@@ -199,7 +233,11 @@ object Scanner {
   }
 
   @tailrec
-  private def multiLineComment(source: String, line: LineNum, current: Position): Either[ScannerError, (LineNum, Position)] =
+  private def multiLineComment(
+    source: String,
+    line: LineNum,
+    current: Position
+  ): Either[ScannerError, (LineNum, Position)] =
     if (current >= source.length) {
       Left(ScannerError(line, "Unterminated multi-line comment."))
     } else {
@@ -212,6 +250,6 @@ object Scanner {
             multiLineComment(source, line, current + 1)
           }
         case '\n' => multiLineComment(source, line + 1, current + 1)
-        case _ => multiLineComment(source, line, current + 1)
+        case _    => multiLineComment(source, line, current + 1)
     }
 }

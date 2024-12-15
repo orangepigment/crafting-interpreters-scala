@@ -24,10 +24,11 @@ object Lox {
   }
 
   private def runFile(path: String): Unit = {
-    val source = new String(Files.readAllBytes(Paths.get(path)), Charset.defaultCharset())
+    val source =
+      new String(Files.readAllBytes(Paths.get(path)), Charset.defaultCharset())
     run(source).left.foreach {
       case _: ScannerError | _: ParserError => sys.exit(65)
-      case _: RuntimeError => sys.exit(70)
+      case _: RuntimeError                  => sys.exit(70)
     }
   }
 
@@ -44,7 +45,7 @@ object Lox {
     (for {
       tokens <- Scanner.scanTokens(source)
       program <- Parser.parse(tokens.toArray)
-      //_ <- Right(AstPrinter.print(expr))
+      // _ <- Right(AstPrinter.print(expr))
       _ <- Interpreter.interpret(program)
     } yield ()).tapError(reportError)
   }
