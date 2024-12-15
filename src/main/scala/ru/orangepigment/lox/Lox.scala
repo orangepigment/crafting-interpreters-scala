@@ -27,8 +27,8 @@ object Lox {
     val source =
       new String(Files.readAllBytes(Paths.get(path)), Charset.defaultCharset())
     run(source).left.foreach {
-      case _: ScannerError | _: ParserError => sys.exit(65)
-      case _: RuntimeError                  => sys.exit(70)
+      case _: ScannerError | _: ParserErrors => sys.exit(65)
+      case _: RuntimeError                   => sys.exit(70)
     }
   }
 
@@ -53,10 +53,13 @@ object Lox {
   private def reportError(error: LoxError): Unit = {
     error match
       case ScannerError(line, message) => report(line, "", message)
-      case ParserError(token, message) =>
-        token match {
-          case EOF(lexeme, line) => report(line, " at end", message)
-          case _ => report(token.line, " at '" + token.lexeme + "'", message)
+      case ParserErrors(errors) =>
+        errors.foreach { e =>
+          e.token match {
+            case EOF(lexeme, line) => report(line, " at end", e.message)
+            case _ =>
+              report(e.token.line, " at '" + e.token.lexeme + "'", e.message)
+          }
         }
       case RuntimeError(token, message) => report(token.line, "", message)
   }
