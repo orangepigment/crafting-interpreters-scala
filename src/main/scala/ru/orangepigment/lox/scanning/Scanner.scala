@@ -113,7 +113,7 @@ object Scanner {
   ): (Position, Token) = {
     val next = end + 1
     val raw = source.substring(start.int, next.int)
-    next -> Number(raw, raw.toDouble, line)
+    next -> NumberToken(raw, raw.toDouble, line)
   }
 
   private def getIdentifierToken(
@@ -128,7 +128,7 @@ object Scanner {
       keywords.get(raw) match
         case Some(keywordBuilder) => keywordBuilder(raw, line)
         case None =>
-          Identifier(raw, raw, line)
+          IdentifierToken(raw, raw, line)
     next -> token
   }
 

@@ -102,7 +102,7 @@ class ScannerSpec extends AnyFlatSpec with Matchers with Inspectors {
         |long *
         |comment */
         |fun F""".stripMargin) shouldEqual Right(
-      List(Fun("fun", line(4)), Identifier("F", "F", line(4)), eofToken(4))
+      List(Fun("fun", line(4)), IdentifierToken("F", "F", line(4)), eofToken(4))
     )
   }
 
@@ -116,21 +116,21 @@ class ScannerSpec extends AnyFlatSpec with Matchers with Inspectors {
 
   it should "scan int and decimal digits" in {
     Scanner.scanTokens("1234") shouldEqual Right(
-      List(Number("1234", 1234.0, line(1)), eofToken())
+      List(NumberToken("1234", 1234.0, line(1)), eofToken())
     )
     Scanner.scanTokens("1234.5") shouldEqual Right(
-      List(Number("1234.5", 1234.5, line(1)), eofToken())
+      List(NumberToken("1234.5", 1234.5, line(1)), eofToken())
     )
     Scanner.scanTokens("0.5") shouldEqual Right(
-      List(Number("0.5", 0.5, line(1)), eofToken())
+      List(NumberToken("0.5", 0.5, line(1)), eofToken())
     )
 
     Scanner.scanTokens("1.") shouldEqual Right(
-      List(Number("1", 1, line(1)), Dot(".", line(1)), eofToken())
+      List(NumberToken("1", 1, line(1)), Dot(".", line(1)), eofToken())
     )
 
     Scanner.scanTokens(".1") shouldEqual Right(
-      List(Dot(".", line(1)), Number("1", 1, line(1)), eofToken())
+      List(Dot(".", line(1)), NumberToken("1", 1, line(1)), eofToken())
     )
   }
 
@@ -227,19 +227,19 @@ class ScannerSpec extends AnyFlatSpec with Matchers with Inspectors {
 
   it should "scan identifiers" in {
     Scanner.scanTokens("a") shouldEqual Right(
-      List(Identifier("a", "a", line(1)), eofToken())
+      List(IdentifierToken("a", "a", line(1)), eofToken())
     )
     Scanner.scanTokens("a_") shouldEqual Right(
-      List(Identifier("a_", "a_", line(1)), eofToken())
+      List(IdentifierToken("a_", "a_", line(1)), eofToken())
     )
     Scanner.scanTokens("ab") shouldEqual Right(
-      List(Identifier("ab", "ab", line(1)), eofToken())
+      List(IdentifierToken("ab", "ab", line(1)), eofToken())
     )
     Scanner.scanTokens("a_b") shouldEqual Right(
-      List(Identifier("a_b", "a_b", line(1)), eofToken())
+      List(IdentifierToken("a_b", "a_b", line(1)), eofToken())
     )
     Scanner.scanTokens("ab2_") shouldEqual Right(
-      List(Identifier("ab2_", "ab2_", line(1)), eofToken())
+      List(IdentifierToken("ab2_", "ab2_", line(1)), eofToken())
     )
   }
 
@@ -278,13 +278,13 @@ class ScannerSpec extends AnyFlatSpec with Matchers with Inspectors {
         Greater(">", line(3)),
         LessEqual("<=", line(3)),
         EqualEqual("==", line(3)),
-        Identifier("a", "a", line(4)),
+        IdentifierToken("a", "a", line(4)),
         Dot(".", line(4)),
-        Identifier("b", "b", line(4)),
+        IdentifierToken("b", "b", line(4)),
         Plus("+", line(4)),
         StringToken("\"str\"", "str", line(4)),
         Star("*", line(4)),
-        Number("2.3", 2.3, line(4)),
+        NumberToken("2.3", 2.3, line(4)),
         eofToken(4)
       )
     )

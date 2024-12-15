@@ -51,23 +51,31 @@ object Parser {
     if (current < tokens.length) {
       tokens(current) match
         case Var(_, _) =>
-          val next = current + 1
-          tokens(next) match {
-            case Identifier(_, raw, _) =>
-              val varName = IdentifierLiteral(raw)
-              tokens(next) match {
+          tokens(current + 1) match {
+            case varName @ IdentifierToken(_, raw, _) =>
+              tokens(current + 2) match {
                 case Equal(_, _) =>
-                  expression(tokens, next + 1).map { exprResult =>
-                    exprResult.map { case (i, expr) =>
-                      i -> VarDeclStmt(varName, Option(expr))
+                  expression(tokens, current + 3).map { exprResult =>
+                    exprResult.flatMap { case (i, expr) =>
+                      tokens(i) match {
+                        case Semicolon(_, _) =>
+                          Right(i + 1 -> VarDeclStmt(varName, Option(expr)))
+                        case wrongToken =>
+                          Left(
+                            i + 1 -> ParserError(
+                              wrongToken,
+                              s"Expected ';' after variable declaration, got $wrongToken instead."
+                            )
+                          )
+                      }
                     }
                   }
                 case Semicolon(_, _) =>
-                  done(Right((current + 2) -> VarDeclStmt(varName, None)))
+                  done(Right(current + 3 -> VarDeclStmt(varName, None)))
                 case wrongToken =>
                   done(
                     Left(
-                      next -> ParserError(
+                      current + 2 -> ParserError(
                         wrongToken,
                         s"Expected ';' after variable declaration, got $wrongToken instead."
                       )
@@ -77,7 +85,7 @@ object Parser {
             case wrongToken =>
               done(
                 Left(
-                  current -> ParserError(
+                  current + 1 -> ParserError(
                     wrongToken,
                     s"Expected variable name, got $wrongToken instead."
                   )
@@ -284,12 +292,12 @@ object Parser {
         case False(_, _) => done(Right((current + 1) -> BooleanLiteral(false)))
         case True(_, _)  => done(Right((current + 1) -> BooleanLiteral(true)))
         case Nil(_, _)   => done(Right((current + 1) -> NilLiteral))
-        case Number(_, raw, _) =>
+        case NumberToken(_, raw, _) =>
           done(Right((current + 1) -> NumberLiteral(raw)))
         case StringToken(_, raw, _) =>
           done(Right((current + 1) -> StringLiteral(raw)))
-        case Identifier(_, raw, _) =>
-          done(Right((current + 1) -> IdentifierLiteral(raw)))
+        case label @ IdentifierToken(_, raw, _) =>
+          done(Right((current + 1) -> IdentifierLiteral(label)))
         case LeftParen(_, _) =>
           tailcall(expression(tokens, current + 1)).flatMap {
             case l @ Left(error) => done(l)

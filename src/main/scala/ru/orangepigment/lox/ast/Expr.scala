@@ -1,6 +1,12 @@
 package ru.orangepigment.lox.ast
 
-import ru.orangepigment.lox.scanning.{Token, TokenLiteral, UnaryOp, BinaryOp}
+import ru.orangepigment.lox.scanning.{
+  BinaryOp,
+  IdentifierToken,
+  Token,
+  TokenLiteral,
+  UnaryOp
+}
 
 sealed trait Expr
 
@@ -23,7 +29,7 @@ final case class NumberLiteral(override val literal: Double)
 final case class StringLiteral(override val literal: String)
     extends ValueLiteral[String]
 
-final case class IdentifierLiteral(literal: String) extends Literal
+final case class IdentifierLiteral(literal: IdentifierToken) extends Literal
 
 final case class BooleanLiteral(override val literal: Boolean)
     extends ValueLiteral[Boolean]

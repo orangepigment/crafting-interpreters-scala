@@ -10,10 +10,10 @@ class ParserSpec extends AnyFlatSpec with Matchers {
   "Parser.parse" should "correctly parse tokens into an expression" in {
     val input: Array[Token] = Array(
       Minus("-", LineNum(1)),
-      Number("123", 123, LineNum(1)),
+      NumberToken("123", 123, LineNum(1)),
       Star("*", LineNum(1)),
       LeftParen("(", LineNum(1)),
-      Number("45.67", 45.67, LineNum(1)),
+      NumberToken("45.67", 45.67, LineNum(1)),
       RightParen(")", LineNum(1)),
       Semicolon(";", LineNum(1)),
       EOF("", LineNum(1))
@@ -34,7 +34,7 @@ class ParserSpec extends AnyFlatSpec with Matchers {
   it should "return error when the input is invalid" in {
     val input: Array[Token] = Array(
       LeftParen("(", LineNum(1)),
-      Number("1", 1, LineNum(1)),
+      NumberToken("1", 1, LineNum(1)),
       EOF("", LineNum(1))
     )
     val expected: ParserErrors = ParserErrors(
@@ -49,7 +49,7 @@ class ParserSpec extends AnyFlatSpec with Matchers {
 
     val input2: Array[Token] = Array(
       LeftParen("(", LineNum(1)),
-      Number("1", 1, LineNum(1)),
+      NumberToken("1", 1, LineNum(1)),
       Plus("+", LineNum(1)),
       EOF("", LineNum(1))
     )
@@ -67,9 +67,9 @@ class ParserSpec extends AnyFlatSpec with Matchers {
   it should "return all errors when the input is invalid" in {
     val input: Array[Token] = Array(
       LeftParen("(", LineNum(1)),
-      Number("1", 1, LineNum(1)),
+      NumberToken("1", 1, LineNum(1)),
       Semicolon(";", LineNum(1)),
-      Number("1", 1, LineNum(2)),
+      NumberToken("1", 1, LineNum(2)),
       Semicolon(";", LineNum(2)),
       Minus("-", LineNum(3)),
       StringToken("\"abc\"", "abc", LineNum(3)),

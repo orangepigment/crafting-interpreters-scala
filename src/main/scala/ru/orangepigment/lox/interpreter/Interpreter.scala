@@ -42,6 +42,8 @@ object Interpreter {
 
   private val INIT: Either[RuntimeError, Unit] = Right(())
 
+  private val environment = Environment()
+
   def interpret(program: List[Stmt]): Either[RuntimeError, Unit] =
     program.foldLeft(INIT) { case (prev, stmt) =>
       prev.flatMap { _ =>
@@ -49,7 +51,12 @@ object Interpreter {
           case ExpressionStmt(expression) => evaluate(expression).map(_ => ())
           case PrintStmt(expression) =>
             evaluate(expression).map(r => println(stringify(r)))
-          case VarDeclStmt(name, expression) => ???
+          case VarDeclStmt(name, expression) =>
+            expression.fold(
+              Right(environment.define(name, Option.empty[Any]))
+            ) { expr =>
+              evaluate(expr).map(value => environment.define(name, value))
+            }
       }
     }
 
@@ -101,12 +108,12 @@ object Interpreter {
             // case And(_, _) => rightOption(isTruthy(l) && isTruthy(r))
             // case Or(_, _) => rightOption(isTruthy(l) || isTruthy(r))
           }
-        case Grouping(expression)   => tailcall(walk(expression))
-        case StringLiteral(raw)     => done(Right(Option(raw)))
-        case NumberLiteral(raw)     => done(Right(Option(raw)))
-        case BooleanLiteral(raw)    => done(Right(Option(raw)))
-        case IdentifierLiteral(raw) => done(Right(Option(raw)))
-        case NilLiteral             => done(Right(Option.empty[Any]))
+        case Grouping(expression)     => tailcall(walk(expression))
+        case StringLiteral(raw)       => done(Right(Option(raw)))
+        case NumberLiteral(raw)       => done(Right(Option(raw)))
+        case BooleanLiteral(raw)      => done(Right(Option(raw)))
+        case IdentifierLiteral(label) => done(environment.get(label))
+        case NilLiteral               => done(Right(Option.empty[Any]))
     }
 
     for {

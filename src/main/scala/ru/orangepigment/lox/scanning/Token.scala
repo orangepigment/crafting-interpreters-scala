@@ -98,7 +98,7 @@ sealed trait TokenLiteral[A] extends Token {
     s"L$line: ${getClass.getSimpleName} $lexeme $raw"
 }
 
-final case class Identifier(
+final case class IdentifierToken(
   override val lexeme: String,
   override val raw: String,
   override val line: LineNum
@@ -110,7 +110,7 @@ final case class StringToken(
   override val line: LineNum
 ) extends TokenLiteral[String]
 
-final case class Number(
+final case class NumberToken(
   override val lexeme: String,
   override val raw: Double,
   override val line: LineNum
