@@ -35,3 +35,5 @@ final case class BooleanLiteral(override val literal: Boolean)
     extends ValueLiteral[Boolean]
 
 case object NilLiteral extends Literal
+
+final case class Assignment(name: IdentifierToken, value: Expr) extends Expr

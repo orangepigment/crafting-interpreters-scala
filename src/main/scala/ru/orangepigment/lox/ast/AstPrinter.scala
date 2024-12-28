@@ -22,6 +22,8 @@ object AstPrinter {
         case NilLiteral               => done("nil")
         case Unary(operator, right) =>
           tailcall(walk(right)).map(r => s"(${operator.lexeme} $r)")
+        case Assignment(name, value) =>
+          tailcall(walk(value)).map(r => s"(${name.raw} = $r)")
     }
 
     walk(expr).result

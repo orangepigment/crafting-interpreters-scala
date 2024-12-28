@@ -31,13 +31,14 @@ object Parser {
         case EOF(_, _) =>
           if (errors.isEmpty) done(Right(statements)) else done(Left(errors))
         case _ =>
-          declaration(tokens, current).flatMap {
+          tailcall(declaration(tokens, current)).flatMap {
             _.fold(
               (i, e) => {
                 val afterError = synchronize(tokens, i)
-                program(tokens, afterError, statements, e +: errors)
+                tailcall(program(tokens, afterError, statements, e +: errors))
               },
-              (i, stmt) => program(tokens, i, stmt +: statements, errors)
+              (i, stmt) =>
+                tailcall(program(tokens, i, stmt +: statements, errors))
             )
           }
     } else {
@@ -55,7 +56,7 @@ object Parser {
             case varName @ IdentifierToken(_, raw, _) =>
               tokens(current + 2) match {
                 case Equal(_, _) =>
-                  expression(tokens, current + 3).map { exprResult =>
+                  tailcall(expression(tokens, current + 3)).map { exprResult =>
                     exprResult.flatMap { case (i, expr) =>
                       tokens(i) match {
                         case Semicolon(_, _) =>
@@ -92,7 +93,7 @@ object Parser {
                 )
               )
           }
-        case _ => statement(tokens, current)
+        case _ => tailcall(statement(tokens, current))
     } else {
       done(unexpectedEndOfInput(tokens, current))
     }
@@ -104,9 +105,9 @@ object Parser {
     if (current < tokens.length) {
       tokens(current) match
         case Print(_, _) =>
-          printStatement(tokens, current + 1)
+          tailcall(printStatement(tokens, current + 1))
         case _ =>
-          expressionStatement(tokens, current)
+          tailcall(expressionStatement(tokens, current))
     } else {
       done(unexpectedEndOfInput(tokens, current))
     }
@@ -117,7 +118,7 @@ object Parser {
     current: Int
   ): TailRec[StmtResult] = {
     if (current < tokens.length) {
-      val exprResult = expression(tokens, current).result
+      val exprResult = tailcall(expression(tokens, current)).result
       done(exprResult.flatMap { case (next, expr) =>
         tokens(next) match
           case Semicolon(_, _) => Right((next + 1) -> PrintStmt(expr))
@@ -139,7 +140,7 @@ object Parser {
     current: Int
   ): TailRec[StmtResult] = {
     if (current < tokens.length) {
-      val exprResult = expression(tokens, current).result
+      val exprResult = tailcall(expression(tokens, current)).result
       done(exprResult.flatMap { case (next, expr) =>
         tokens(next) match
           case Semicolon(_, _) => Right((next + 1) -> ExpressionStmt(expr))
@@ -159,7 +160,35 @@ object Parser {
   private def expression(
     tokens: Array[Token],
     current: Int
-  ): TailRec[ExprResult] = equality(tokens, current)
+  ): TailRec[ExprResult] = tailcall(assignment(tokens, current))
+
+  private def assignment(
+    tokens: Array[Token],
+    current: Int
+  ): TailRec[ExprResult] = {
+    equality(tokens, current).map { eqRes =>
+      eqRes.flatMap { case (i, expr) =>
+        if (i < tokens.length) {
+          tokens(i) match {
+            case equal: Equal =>
+              val assignmentResult =
+                tailcall(assignment(tokens, i + 1)).result
+              assignmentResult.flatMap { case (next, value) =>
+                expr match {
+                  case identifier: IdentifierLiteral =>
+                    Right(next -> Assignment(identifier.literal, value))
+                  case _ =>
+                    Left(i -> ParserError(equal, "Invalid assignment target."))
+                }
+              }
+            case _ => Right(i -> expr)
+          }
+        } else {
+          unexpectedEndOfInput(tokens, i)
+        }
+      }
+    }
+  }
 
   private def equality(
     tokens: Array[Token],

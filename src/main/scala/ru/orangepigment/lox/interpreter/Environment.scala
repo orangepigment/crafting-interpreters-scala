@@ -20,4 +20,17 @@ class Environment {
       Left(RuntimeError(label, s"Undefined variable '${label.lexeme}'."))
     }
   }
+
+  // Assignment is an expression in Lox, so it returns the assigned value
+  def assign(
+    label: IdentifierToken,
+    value: Option[Any]
+  ): Either[RuntimeError, Option[Any]] = {
+    if (values.contains(label.lexeme)) {
+      values.put(label.lexeme, value)
+      Right(value)
+    } else {
+      Left(RuntimeError(label, s"Undefined variable '${label.lexeme}'."))
+    }
+  }
 }

@@ -1,6 +1,7 @@
 package ru.orangepigment.lox.interpreter
 
 import ru.orangepigment.lox.ast.{
+  Assignment,
   Binary,
   BooleanLiteral,
   Expr,
@@ -114,6 +115,12 @@ object Interpreter {
         case BooleanLiteral(raw)      => done(Right(Option(raw)))
         case IdentifierLiteral(label) => done(environment.get(label))
         case NilLiteral               => done(Right(Option.empty[Any]))
+        case Assignment(name, value) =>
+          tailcall(walk(value)).map { e =>
+            e.flatMap { evaluatedValue =>
+              environment.assign(name, evaluatedValue)
+            }
+          }
     }
 
     for {
