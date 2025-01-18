@@ -1,6 +1,5 @@
 package ru.orangepigment.lox
 
-import ru.orangepigment.lox.ast.AstPrinter
 import ru.orangepigment.lox.errors.*
 import ru.orangepigment.lox.interpreter.Interpreter
 import ru.orangepigment.lox.parser.Parser

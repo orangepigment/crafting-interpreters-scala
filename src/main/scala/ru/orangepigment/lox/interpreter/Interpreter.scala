@@ -3,6 +3,7 @@ package ru.orangepigment.lox.interpreter
 import ru.orangepigment.lox.ast.{
   Assignment,
   Binary,
+  BlockStmt,
   BooleanLiteral,
   Expr,
   ExpressionStmt,
@@ -43,25 +44,40 @@ object Interpreter {
 
   private val INIT: Either[RuntimeError, Unit] = Right(())
 
-  private val environment = Environment()
-
   def interpret(program: List[Stmt]): Either[RuntimeError, Unit] =
+    interpret(program, Environment())
+
+  private def interpret(
+    program: List[Stmt],
+    environment: Environment
+  ): Either[RuntimeError, Unit] =
     program.foldLeft(INIT) { case (prev, stmt) =>
       prev.flatMap { _ =>
         stmt match
-          case ExpressionStmt(expression) => evaluate(expression).map(_ => ())
+          case ExpressionStmt(expression) =>
+            evaluate(expression, environment).map(_ => ())
           case PrintStmt(expression) =>
-            evaluate(expression).map(r => println(stringify(r)))
+            evaluate(expression, environment).map(r => println(stringify(r)))
           case VarDeclStmt(name, expression) =>
             expression.fold(
               Right(environment.define(name, Option.empty[Any]))
             ) { expr =>
-              evaluate(expr).map(value => environment.define(name, value))
+              evaluate(expr, environment).map(value =>
+                environment.define(name, value)
+              )
             }
+          case BlockStmt(statements) =>
+            interpret(statements, Environment(Option(environment)))
       }
     }
 
-  def evaluate(expr: Expr): InterpreterResult = {
+  def evaluate(expr: Expr): InterpreterResult =
+    evaluate(expr, Environment())
+
+  private def evaluate(
+    expr: Expr,
+    environment: Environment
+  ): InterpreterResult = {
     def walk(expr: Expr): TailRec[InterpreterResult] = {
       expr match
         case Unary(operator, expr) =>

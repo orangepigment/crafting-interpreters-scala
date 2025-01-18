@@ -14,14 +14,14 @@ class AstPrinterSpec extends AnyFlatSpec with Matchers {
         Grouping(NumberLiteral(45.67))
       )
 
-    AstPrinter.render(expression) shouldEqual "(* (- 123.0) (group 45.67))"
+    AstPrinter.render(expression) `shouldEqual` "(* (- 123.0) (group 45.67))"
   }
 
   it should "render another ast correctly" in {
     val expression =
       Unary(Bang("!", LineNum(1)), BooleanLiteral(false))
 
-    AstPrinter.render(expression) shouldEqual "(! false)"
+    AstPrinter.render(expression) `shouldEqual` "(! false)"
   }
 
 }

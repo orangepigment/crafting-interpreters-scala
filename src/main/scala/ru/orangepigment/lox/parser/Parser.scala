@@ -106,6 +106,8 @@ object Parser {
       tokens(current) match
         case Print(_, _) =>
           tailcall(printStatement(tokens, current + 1))
+        case LeftBrace(_, _) =>
+          tailcall(blockStatement(tokens, current + 1))
         case _ =>
           tailcall(expressionStatement(tokens, current))
     } else {
@@ -157,6 +159,43 @@ object Parser {
     }
   }
 
+  private def blockStatement(
+    tokens: Array[Token],
+    current: Int
+  ): TailRec[StmtResult] = {
+    def loop(
+      current: Int,
+      stmts: List[Stmt]
+    ): TailRec[Either[(Int, ParserError), (Int, List[Stmt])]] = {
+      if (current < tokens.length) {
+        tokens(current) match {
+          case _: RightBrace => done(Right(current + 1, stmts))
+          case _ =>
+            declaration(tokens, current).flatMap { declRes =>
+              declRes.fold(
+                e => done(Left(e)),
+                (i, stmt) => tailcall(loop(i, stmt +: stmts))
+              )
+            }
+        }
+      } else
+        done(
+          Left(
+            current -> ParserError(
+              tokens(current - 1),
+              "Expected '}' after block., but got end of file."
+            )
+          )
+        )
+    }
+
+    loop(current, List.empty).map { res =>
+      res.map { case (i, stmts) =>
+        i -> BlockStmt(stmts.reverse)
+      }
+    }
+  }
+
   private def expression(
     tokens: Array[Token],
     current: Int
@@ -194,9 +233,7 @@ object Parser {
     tokens: Array[Token],
     current: Int
   ): TailRec[ExprResult] = {
-    def loop(
-      tokens: Array[Token]
-    )(current: Int, expr: Expr): TailRec[ExprResult] = {
+    def loop(current: Int, expr: Expr): TailRec[ExprResult] = {
       if (current < tokens.length)
         val operator = tokens(current)
         operator match {
@@ -205,7 +242,7 @@ object Parser {
               case (next, right) =>
                 val eqExpr =
                   Binary(expr, operator.asInstanceOf[BinaryOp], right)
-                loop(tokens)(next, eqExpr)
+                loop(next, eqExpr)
             }
           case _ => done(Right(current, expr))
         }
@@ -213,7 +250,7 @@ object Parser {
     }
 
     nestedExprTailCall(comparison(tokens, current)) {
-      loop(tokens)
+      loop
     }
   }
 
@@ -221,9 +258,7 @@ object Parser {
     tokens: Array[Token],
     current: Int
   ): TailRec[ExprResult] = {
-    def loop(
-      tokens: Array[Token]
-    )(current: Int, expr: Expr): TailRec[ExprResult] = {
+    def loop(current: Int, expr: Expr): TailRec[ExprResult] = {
       if (current < tokens.length)
         val operator = tokens(current)
         operator match {
@@ -233,7 +268,7 @@ object Parser {
               case (next, right) =>
                 val compExpr =
                   Binary(expr, operator.asInstanceOf[BinaryOp], right)
-                loop(tokens)(next, compExpr)
+                loop(next, compExpr)
             }
           case _ => done(Right(current, expr))
         }
@@ -241,14 +276,12 @@ object Parser {
     }
 
     nestedExprTailCall(term(tokens, current)) {
-      loop(tokens)
+      loop
     }
   }
 
   private def term(tokens: Array[Token], current: Int): TailRec[ExprResult] = {
-    def loop(
-      tokens: Array[Token]
-    )(current: Int, expr: Expr): TailRec[ExprResult] = {
+    def loop(current: Int, expr: Expr): TailRec[ExprResult] = {
       if (current < tokens.length)
         val operator = tokens(current)
         operator match {
@@ -257,7 +290,7 @@ object Parser {
               case (next, right) =>
                 val termExpr =
                   Binary(expr, operator.asInstanceOf[BinaryOp], right)
-                loop(tokens)(next, termExpr)
+                loop(next, termExpr)
             }
           case _ => done(Right(current, expr))
         }
@@ -265,7 +298,7 @@ object Parser {
     }
 
     nestedExprTailCall(factor(tokens, current)) {
-      loop(tokens)
+      loop
     }
   }
 
@@ -273,9 +306,7 @@ object Parser {
     tokens: Array[Token],
     current: Int
   ): TailRec[ExprResult] = {
-    def loop(
-      tokens: Array[Token]
-    )(current: Int, expr: Expr): TailRec[ExprResult] = {
+    def loop(current: Int, expr: Expr): TailRec[ExprResult] = {
       if (current < tokens.length)
         val operator = tokens(current)
         operator match {
@@ -284,7 +315,7 @@ object Parser {
               case (next, right) =>
                 val factorExpr =
                   Binary(expr, operator.asInstanceOf[BinaryOp], right)
-                loop(tokens)(next, factorExpr)
+                loop(next, factorExpr)
             }
           case _ => done(Right(current, expr))
         }
@@ -292,7 +323,7 @@ object Parser {
     }
 
     nestedExprTailCall(unary(tokens, current)) {
-      loop(tokens)
+      loop
     }
   }
 
@@ -377,20 +408,20 @@ object Parser {
 
   private def synchronize(tokens: Array[Token], current: Int): Int = {
     @tailrec
-    def loop(tokens: Array[Token], current: Int): Int = {
+    def loop(current: Int): Int = {
       if (current < tokens.length) {
         tokens(current) match
           case _: Semicolon => current + 1
           case _: Class | _: Fun | _: Var | _: For | _: If | _: While |
               _: Print | _: Return =>
             current
-          case _ => loop(tokens, current + 1)
+          case _ => loop(current + 1)
       } else {
         current
       }
     }
 
-    loop(tokens, current)
+    loop(current)
   }
 
   private def nestedExprTailCall(

@@ -30,7 +30,7 @@ class InterpreterSpec
         Grouping(NumberLiteral(45.67))
       )
 
-    Interpreter.evaluate(expression) shouldEqual Right(Option(-5617.41))
+    Interpreter.evaluate(expression) `shouldEqual` Right(Option(-5617.41))
   }
 
   it should "eval subtraction correctly for numbers" in {
@@ -38,7 +38,7 @@ class InterpreterSpec
       val expression =
         Binary(NumberLiteral(d1), Minus("-", LineNum(1)), NumberLiteral(d2))
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 - d2))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(d1 - d2))
     }
   }
 
@@ -47,7 +47,7 @@ class InterpreterSpec
       val expression =
         Binary(NumberLiteral(d1), Plus("+", LineNum(1)), NumberLiteral(d2))
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 + d2))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(d1 + d2))
     }
   }
 
@@ -63,7 +63,7 @@ class InterpreterSpec
       val expression =
         Binary(lit1, Plus("+", LineNum(1)), lit2)
 
-      Interpreter.evaluate(expression) shouldEqual Left(
+      Interpreter.evaluate(expression) `shouldEqual` Left(
         RuntimeError(
           Plus("+", LineNum(1)),
           "Operands must be two numbers or two strings."
@@ -77,7 +77,7 @@ class InterpreterSpec
       val expression =
         Binary(StringLiteral(s1), Plus("+", LineNum(1)), StringLiteral(s2))
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(s1 + s2))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(s1 + s2))
     }
   }
 
@@ -86,7 +86,7 @@ class InterpreterSpec
       val expression =
         Binary(NumberLiteral(d1), Star("*", LineNum(1)), NumberLiteral(d2))
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 * d2))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(d1 * d2))
     }
   }
 
@@ -95,7 +95,7 @@ class InterpreterSpec
       val expression =
         Binary(NumberLiteral(d1), Slash("/", LineNum(1)), NumberLiteral(d2))
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 / d2))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(d1 / d2))
     }
   }
 
@@ -115,7 +115,7 @@ class InterpreterSpec
       val expression =
         Binary(lit1, operator, lit2)
 
-      Interpreter.evaluate(expression) shouldEqual Left(
+      Interpreter.evaluate(expression) `shouldEqual` Left(
         RuntimeError(operator, "Operands must be two numbers.")
       )
     }
@@ -126,7 +126,7 @@ class InterpreterSpec
       val expression =
         Binary(NumberLiteral(d1), Greater(">", LineNum(1)), NumberLiteral(d2))
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 > d2))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(d1 > d2))
     }
   }
 
@@ -139,7 +139,7 @@ class InterpreterSpec
           NumberLiteral(d2)
         )
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 >= d2))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(d1 >= d2))
     }
   }
 
@@ -148,7 +148,7 @@ class InterpreterSpec
       val expression =
         Binary(NumberLiteral(d1), Less("<", LineNum(1)), NumberLiteral(d2))
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 < d2))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(d1 < d2))
     }
   }
 
@@ -161,7 +161,7 @@ class InterpreterSpec
           NumberLiteral(d2)
         )
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(d1 <= d2))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(d1 <= d2))
     }
   }
 
@@ -177,7 +177,7 @@ class InterpreterSpec
       val expression =
         Binary(lit1, operator, lit2)
 
-      Interpreter.evaluate(expression) shouldEqual Left(
+      Interpreter.evaluate(expression) `shouldEqual` Left(
         RuntimeError(operator, "Operands must be two numbers.")
       )
     }
@@ -188,7 +188,7 @@ class InterpreterSpec
       val expression =
         Unary(Minus("-", LineNum(1)), NumberLiteral(d))
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(-d))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(-d))
     }
   }
 
@@ -197,7 +197,7 @@ class InterpreterSpec
       val expression =
         Unary(Minus("-", LineNum(1)), lit)
 
-      Interpreter.evaluate(expression) shouldEqual Left(
+      Interpreter.evaluate(expression) `shouldEqual` Left(
         RuntimeError(Minus("-", LineNum(1)), "Operand must be a number.")
       )
     }
@@ -208,7 +208,7 @@ class InterpreterSpec
       val expression =
         Unary(Bang("!", LineNum(1)), BooleanLiteral(b))
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(!b))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(!b))
     }
   }
 
@@ -217,7 +217,7 @@ class InterpreterSpec
       val expression =
         Unary(Bang("!", LineNum(1)), NumberLiteral(d))
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(false))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(false))
     }
   }
 
@@ -226,7 +226,7 @@ class InterpreterSpec
       val expression =
         Unary(Bang("!", LineNum(1)), StringLiteral(s))
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(false))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(false))
     }
   }
 
@@ -234,7 +234,7 @@ class InterpreterSpec
     val expression =
       Unary(Bang("!", LineNum(1)), NilLiteral)
 
-    Interpreter.evaluate(expression) shouldEqual Right(Option(true))
+    Interpreter.evaluate(expression) `shouldEqual` Right(Option(true))
   }
 
   it should "check any non-nil literal equality to nil correctly" in {
@@ -243,7 +243,7 @@ class InterpreterSpec
       val expression =
         Binary(lit1, EqualEqual("==", LineNum(1)), lit2)
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(false))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(false))
     }
   }
 
@@ -253,7 +253,7 @@ class InterpreterSpec
       val expression =
         Binary(lit1, BangEqual("!=", LineNum(1)), lit2)
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(true))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(true))
     }
   }
 
@@ -261,14 +261,14 @@ class InterpreterSpec
     val expression =
       Binary(NilLiteral, EqualEqual("==", LineNum(1)), NilLiteral)
 
-    Interpreter.evaluate(expression) shouldEqual Right(Option(true))
+    Interpreter.evaluate(expression) `shouldEqual` Right(Option(true))
   }
 
   it should "check nil non-equality correctly" in {
     val expression =
       Binary(NilLiteral, BangEqual("!=", LineNum(1)), NilLiteral)
 
-    Interpreter.evaluate(expression) shouldEqual Right(Option(false))
+    Interpreter.evaluate(expression) `shouldEqual` Right(Option(false))
   }
 
   it should "check equality of literals of different types correctly" in {
@@ -284,7 +284,7 @@ class InterpreterSpec
       val expression =
         Binary(lit1, EqualEqual("==", LineNum(1)), lit2)
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(false))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(false))
     }
   }
 
@@ -301,7 +301,7 @@ class InterpreterSpec
       val expression =
         Binary(lit1, BangEqual("!=", LineNum(1)), lit2)
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(true))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(true))
     }
   }
 
@@ -311,7 +311,7 @@ class InterpreterSpec
       val expression =
         Binary(lit, EqualEqual("==", LineNum(1)), lit)
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(true))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(true))
     }
   }
 
@@ -321,24 +321,24 @@ class InterpreterSpec
       val expression =
         Binary(lit, BangEqual("!=", LineNum(1)), lit)
 
-      Interpreter.evaluate(expression) shouldEqual Right(Option(false))
+      Interpreter.evaluate(expression) `shouldEqual` Right(Option(false))
     }
   }
 
   /*"Interpreter.interpretAndStringify" should "format result correctly" in {
     forAll(Gen.oneOf(genStringLiteral, genBooleanLiteral)) { lit =>
-      Interpreter.interpretAndStringify(lit) shouldEqual Right(lit.literal.toString)
+      Interpreter.interpretAndStringify(lit) `shouldEqual` Right(lit.literal.toString)
     }
   }
 
   // It is unpredictable, how long numbers will be formatted. Plus precision loss.
   it should "format whole numbers correctly" ignore {
     forAll { (l: Long) =>
-      Interpreter.interpretAndStringify(NumberLiteral(l)) shouldEqual Right(l.toString)
+      Interpreter.interpretAndStringify(NumberLiteral(l)) `shouldEqual` Right(l.toString)
     }
   }
 
   it should "format nil correctly" in {
-    Interpreter.interpretAndStringify(NilLiteral) shouldEqual Right("nil")
+    Interpreter.interpretAndStringify(NilLiteral) `shouldEqual` Right("nil")
   }*/
 }

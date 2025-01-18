@@ -5,7 +5,7 @@ import ru.orangepigment.lox.scanning.IdentifierToken
 
 import scala.collection.mutable
 
-class Environment {
+class Environment private (enclosing: Option[Environment]) {
   private val values: mutable.Map[String, Option[Any]] = mutable.Map.empty
 
   def define(label: IdentifierToken, value: Option[Any]): Unit = {
@@ -17,7 +17,9 @@ class Environment {
     if (values.contains(label.lexeme)) {
       Right(values(label.lexeme))
     } else {
-      Left(RuntimeError(label, s"Undefined variable '${label.lexeme}'."))
+      enclosing.fold(
+        Left(RuntimeError(label, s"Undefined variable '${label.lexeme}'."))
+      )(_.get(label))
     }
   }
 
@@ -30,7 +32,14 @@ class Environment {
       values.put(label.lexeme, value)
       Right(value)
     } else {
-      Left(RuntimeError(label, s"Undefined variable '${label.lexeme}'."))
+      enclosing.fold(
+        Left(RuntimeError(label, s"Undefined variable '${label.lexeme}'."))
+      )(_.assign(label, value))
     }
   }
+}
+
+object Environment {
+  def apply(enclosing: Option[Environment] = None): Environment =
+    new Environment(enclosing)
 }

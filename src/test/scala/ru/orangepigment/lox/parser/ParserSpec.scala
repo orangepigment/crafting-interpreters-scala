@@ -28,7 +28,7 @@ class ParserSpec extends AnyFlatSpec with Matchers {
       )
     )
 
-    Parser.parse(input) shouldEqual Right(expected)
+    Parser.parse(input) `shouldEqual` Right(expected)
   }
 
   it should "return error when the input is invalid" in {
@@ -45,7 +45,7 @@ class ParserSpec extends AnyFlatSpec with Matchers {
         )
       )
     )
-    Parser.parse(input) shouldEqual Left(expected)
+    Parser.parse(input) `shouldEqual` Left(expected)
 
     val input2: Array[Token] = Array(
       LeftParen("(", LineNum(1)),
@@ -61,7 +61,7 @@ class ParserSpec extends AnyFlatSpec with Matchers {
         )
       )
     )
-    Parser.parse(input2) shouldEqual Left(expected2)
+    Parser.parse(input2) `shouldEqual` Left(expected2)
   }
 
   it should "return all errors when the input is invalid" in {
@@ -87,6 +87,6 @@ class ParserSpec extends AnyFlatSpec with Matchers {
         )
       )
     )
-    Parser.parse(input) shouldEqual Left(expected)
+    Parser.parse(input) `shouldEqual` Left(expected)
   }
 }
